@@ -1,0 +1,239 @@
+<mat-toolbar color="primary">
+  <span>User Management System</span>
+  <span style="flex:1"></span>
+  <a mat-button routerLink="/users" style="color:white">👥 Users</a>
+  <a mat-button routerLink="/documents" style="color:white">📁 Documents</a>
+  <button mat-button style="color:white" (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="fm-container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <button mat-button (click)="goHome()">🏠 Root</button>
+    <ng-container *ngFor="let crumb of breadcrumb; let i = index">
+      <span class="sep">›</span>
+      <button mat-button (click)="breadcrumb = breadcrumb.slice(0,i+1); currentFolder = crumb; load()">
+        {{ crumb?.name || 'Root' }}
+      </button>
+    </ng-container>
+    <ng-container *ngIf="currentFolder">
+      <span class="sep">›</span>
+      <span class="current">{{ currentFolder.name }}</span>
+    </ng-container>
+  </div>
+
+  <!-- Top action bar -->
+  <div class="actions-bar">
+    <button mat-raised-button color="primary" (click)="showNewFolderInput = !showNewFolderInput">📁 New Folder</button>
+    <button mat-stroked-button (click)="showLabelManager = !showLabelManager">🏷️ Manage Labels</button>
+  </div>
+
+  <!-- Label Manager Panel -->
+  <div class="label-manager" *ngIf="showLabelManager">
+    <h3>Labels</h3>
+    <div class="label-list">
+      <div class="label-row" *ngFor="let label of labels">
+        <ng-container *ngIf="renamingLabel?.id !== label.id; else renameL">
+          <span class="label-badge">{{ label.name }}</span>
+          <span class="default-tag" *ngIf="label.is_default">default</span>
+          <ng-container *ngIf="!label.is_default">
+            <button mat-icon-button matTooltip="Rename" (click)="startRenameLabel(label)">✏️</button>
+            <button mat-icon-button matTooltip="Delete" (click)="deleteLabel(label)">🗑️</button>
+          </ng-container>
+        </ng-container>
+        <ng-template #renameL>
+          <input class="rename-input" [(ngModel)]="renameLabelValue" (keyup.enter)="submitRenameLabel()" />
+          <button mat-raised-button color="primary" (click)="submitRenameLabel()">Save</button>
+          <button mat-stroked-button (click)="renamingLabel = null">Cancel</button>
+        </ng-template>
+      </div>
+    </div>
+    <div class="new-label-row">
+      <mat-form-field appearance="outline" style="width:200px">
+        <mat-label>New custom label</mat-label>
+        <input matInput [(ngModel)]="newLabelName" (keyup.enter)="createLabel()" />
+      </mat-form-field>
+      <button mat-raised-button color="accent" (click)="createLabel()">Add</button>
+    </div>
+  </div>
+
+  <!-- New folder input -->
+  <div class="new-folder-row" *ngIf="showNewFolderInput">
+    <mat-form-field appearance="outline" style="width:250px">
+      <mat-label>Folder name</mat-label>
+      <input matInput [(ngModel)]="newFolderName" (keyup.enter)="createFolder()" />
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="createFolder()">Create</button>
+    <button mat-stroked-button (click)="showNewFolderInput = false; newFolderName = ''">Cancel</button>
+  </div>
+
+  <!-- Upload panel -->
+  <div class="upload-panel">
+    <h4 style="margin:0 0 8px 0;">Upload Document</h4>
+    <div class="upload-row">
+      <input #fileInput type="file" accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none" (change)="onFileSelected($event)" />
+      <button mat-stroked-button (click)="fileInput.click()">📄 Choose File</button>
+      <span class="file-name">{{ selectedFile ? selectedFile.name : 'No file chosen' }}</span>
+
+      <!-- Destination folder picker -->
+      <mat-form-field appearance="outline" style="width:180px">
+        <mat-label>Upload to</mat-label>
+        <select matNativeControl [(ngModel)]="uploadFolderId">
+          <option [ngValue]="null">📁 Root</option>
+          <option *ngFor="let f of allFolders" [ngValue]="f.id">📁 {{ f.name }}</option>
+        </select>
+      </mat-form-field>
+
+      <!-- Label picker -->
+      <mat-form-field appearance="outline" style="width:180px">
+        <mat-label>Label (optional)</mat-label>
+        <select matNativeControl [(ngModel)]="uploadLabel">
+          <option [ngValue]="null">— None —</option>
+          <option *ngFor="let l of labels" [ngValue]="l.name">{{ l.name }}</option>
+        </select>
+      </mat-form-field>
+
+      <button mat-raised-button color="accent" [disabled]="!selectedFile" (click)="uploadFile()">Upload</button>
+    </div>
+  </div>
+
+  <!-- Sort & Filter bar -->
+  <div class="sort-bar">
+    <span class="sort-label">Sort by:</span>
+    <button mat-stroked-button [class.active-sort]="sortBy==='label'" (click)="setSort('label')">
+      🏷️ Label
+    </button>
+    <button mat-stroked-button [class.active-sort]="sortBy==='type'" (click)="setSort('type')">
+      📄 File Type
+    </button>
+    <button mat-stroked-button [class.active-sort]="sortBy==='size'" (click)="setSort('size')">
+      💾 Size {{ sortBy==='size' ? (sortDir==='asc' ? '↑' : '↓') : '' }}
+    </button>
+    <button mat-stroked-button [class.active-sort]="sortBy==='date'" (click)="setSort('date')">
+      📅 Upload Date {{ sortBy==='date' ? (sortDir==='asc' ? '↑' : '↓') : '' }}
+    </button>
+
+    <span style="margin-left:16px; font-size:13px;">Filter:</span>
+    <mat-form-field appearance="outline" style="width:160px; margin-left:8px;">
+      <mat-label>By Label</mat-label>
+      <select matNativeControl [(ngModel)]="filterLabel" (change)="applySort()">
+        <option value="">All</option>
+        <option *ngFor="let l of labels" [value]="l.name">{{ l.name }}</option>
+      </select>
+    </mat-form-field>
+  </div>
+
+  <!-- File Manager Grid -->
+  <div class="fm-grid">
+
+    <!-- Folders -->
+    <div class="fm-item folder-item" *ngFor="let folder of folders">
+      <ng-container *ngIf="renamingFolder?.id !== folder.id; else renameFolder">
+        <div class="item-icon" (dblclick)="openFolder(folder)">📁</div>
+        <div class="item-name" (dblclick)="openFolder(folder)">{{ folder.name }}</div>
+        <div class="item-actions">
+          <button mat-icon-button matTooltip="Open" (click)="openFolder(folder)">▶</button>
+          <button mat-icon-button matTooltip="Rename" (click)="startRenameFolder(folder)">✏️</button>
+          <button mat-icon-button matTooltip="Delete" (click)="deleteFolder(folder)">🗑️</button>
+        </div>
+      </ng-container>
+      <ng-template #renameFolder>
+        <input class="rename-input" [(ngModel)]="renameValue" (keyup.enter)="submitRenameFolder()" />
+        <div class="item-actions">
+          <button mat-raised-button color="primary" (click)="submitRenameFolder()">Save</button>
+          <button mat-stroked-button (click)="renamingFolder = null">Cancel</button>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Documents -->
+    <div class="fm-item doc-item" *ngFor="let doc of filteredDocuments">
+      <ng-container *ngIf="renamingDocument?.id !== doc.id; else renameDoc">
+        <div class="item-icon" (click)="viewDocument(doc)">📄</div>
+        <div class="item-name" (click)="viewDocument(doc)" [matTooltip]="doc.original_name">{{ doc.original_name }}</div>
+
+        <!-- Label badge -->
+        <ng-container *ngIf="editingLabelDoc?.id !== doc.id; else editLabel">
+          <div class="doc-label" *ngIf="doc.label" (click)="startEditLabel(doc)" matTooltip="Click to change label">
+            🏷️ {{ doc.label }}
+          </div>
+          <div class="doc-label no-label" *ngIf="!doc.label" (click)="startEditLabel(doc)" matTooltip="Click to add label">
+            + Add label
+          </div>
+        </ng-container>
+        <ng-template #editLabel>
+          <select class="label-select" [(ngModel)]="editLabelValue">
+            <option [ngValue]="null">— None —</option>
+            <option *ngFor="let l of labels" [ngValue]="l.name">{{ l.name }}</option>
+          </select>
+          <div class="item-actions">
+            <button mat-raised-button color="primary" (click)="submitEditLabel()">Save</button>
+            <button mat-stroked-button (click)="editingLabelDoc = null">Cancel</button>
+          </div>
+        </ng-template>
+
+        <div class="item-actions">
+          <button mat-icon-button matTooltip="View" (click)="viewDocument(doc)">👁️</button>
+          <button mat-icon-button matTooltip="Download" (click)="downloadDocument(doc)">⬇️</button>
+          <button mat-icon-button matTooltip="Move" (click)="openMoveModal(doc)">📂</button>
+          <button mat-icon-button matTooltip="Info" (click)="showInfo(doc)">ℹ️</button>
+          <button mat-icon-button matTooltip="Rename" (click)="startRenameDocument(doc)">✏️</button>
+          <button mat-icon-button matTooltip="Delete" (click)="deleteDocument(doc)">🗑️</button>
+        </div>
+      </ng-container>
+      <ng-template #renameDoc>
+        <input class="rename-input" [(ngModel)]="renameValue" (keyup.enter)="submitRenameDocument()" />
+        <div class="item-actions">
+          <button mat-raised-button color="primary" (click)="submitRenameDocument()">Save</button>
+          <button mat-stroked-button (click)="renamingDocument = null">Cancel</button>
+        </div>
+      </ng-template>
+
+      <!-- Info Panel -->
+      <div class="info-panel" *ngIf="infoDoc?.id === doc.id">
+        <p><strong>Name:</strong> {{ doc.original_name }}</p>
+        <p><strong>Label:</strong> {{ doc.label || '—' }}</p>
+        <p><strong>Uploaded by:</strong> {{ doc.uploaded_by_name }}</p>
+        <p><strong>Date:</strong> {{ doc.uploaded_at | date:'medium' }}</p>
+        <p><strong>Size:</strong> {{ formatSize(doc.size) }}</p>
+        <p><strong>Type:</strong> {{ doc.mime_type }}</p>
+        <p><strong>Location:</strong> {{ folderNameById(doc.folder_id) }}</p>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="folders.length === 0 && filteredDocuments.length === 0">
+      <p>This folder is empty. Upload a file or create a folder to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Move File Modal -->
+<div class="viewer-overlay" *ngIf="movingDocument">
+  <div class="move-modal">
+    <h3>Move "{{ movingDocument.original_name }}"</h3>
+    <mat-form-field appearance="outline" style="width:100%">
+      <mat-label>Move to folder</mat-label>
+      <select matNativeControl [(ngModel)]="moveTargetFolderId">
+        <option [ngValue]="null">📁 Root</option>
+        <option *ngFor="let f of allFolders" [ngValue]="f.id">📁 {{ f.name }}</option>
+      </select>
+    </mat-form-field>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+      <button mat-stroked-button (click)="closeMoveModal()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="submitMove()">Move</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inline Document Viewer -->
+<div class="viewer-overlay" *ngIf="viewerOpen">
+  <div class="viewer-modal">
+    <div class="viewer-header">
+      <span>{{ viewerDoc?.original_name }}</span>
+      <button mat-button style="color:white" (click)="closeViewer()">✕ Close</button>
+    </div>
+    <iframe class="viewer-frame" [src]="viewerUrl" frameborder="0"></iframe>
+  </div>
+</div>

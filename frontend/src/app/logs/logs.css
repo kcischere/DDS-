@@ -1,0 +1,64 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #e0f2f1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.logs-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00695c;
+  margin-bottom: 24px;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.filter-card mat-form-field {
+  width: 300px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+}
+
+.table-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logs-table {
+  width: 100%;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #888;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-login { background-color: #c8e6c9; color: #2e7d32; }
+.badge-login-failed { background-color: #ffcdd2; color: #c62828; }
+.badge-register { background-color: #bbdefb; color: #1565c0; }
+.badge-add-user { background-color: #e1bee7; color: #6a1b9a; }
+.badge-update-user { background-color: #fff9c4; color: #f57f17; }
+.badge-disable-user { background-color: #ffe0b2; color: #e65100; }
+.badge-enable-user { background-color: #c8e6c9; color: #2e7d32; }
+.badge-delete-user { background-color: #ffcdd2; color: #c62828; }
+.badge-upload-document { background-color: #b2ebf2; color: #00838f; }
+.badge-download-document { background-color: #dcedc8; color: #558b2f; }
+.badge-delete-document { background-color: #ffcdd2; color: #c62828; }

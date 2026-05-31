@@ -84,3 +84,51 @@
 .badge-active { background-color: #c8e6c9; color: #2e7d32; }
 .badge-inactive { background-color: #ffe0b2; color: #e65100; }
 .badge-deleted { background-color: #ffcdd2; color: #c62828; }
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible-header:hover mat-card-title {
+  color: #00695c;
+}
+
+.toggle-icon {
+  font-size: 14px;
+  margin-left: 8px;
+  color: #888;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00695c;
+  margin: 24px 0 12px 0;
+}
+
+.table-card {
+  margin-bottom: 16px;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #888;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.storage {
+  font-size: 24px !important;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  margin-bottom: 0;
+}

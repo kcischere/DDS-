@@ -1,0 +1,75 @@
+<mat-toolbar color="primary">
+  <span>ERDMS</span>
+  <span style="flex:1"></span>
+  <a mat-button routerLink="/admin/users" style="color:white">👥 Users</a>
+  <a mat-button routerLink="/admin/documents" style="color:white">📁 Documents</a>
+  <a mat-button routerLink="/admin/information" style="color:white">🪪 Information</a>
+  <a mat-button routerLink="/admin/status" style="color:white">📊 Status</a>
+  <a mat-button routerLink="/admin/myinfo" style="color:white">👤 My Info</a>
+  <button mat-button style="color:white" (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="dashboard-container">
+  <h1 class="dashboard-title">User Status Dashboard</h1>
+
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <ng-container *ngIf="stats && !loading">
+    <div class="stats-grid">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value">{{ stats.totalUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card active">
+        <mat-card-content>
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <span class="stat-label">Active Users</span>
+            <span class="stat-value">{{ stats.activeUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inactive">
+        <mat-card-content>
+          <div class="stat-icon">⏸️</div>
+          <div class="stat-info">
+            <span class="stat-label">Inactive Users</span>
+            <span class="stat-value">{{ stats.inactiveUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card deleted">
+        <mat-card-content>
+          <div class="stat-icon">🗑️</div>
+          <div class="stat-info">
+            <span class="stat-label">Deleted Users</span>
+            <span class="stat-value">{{ stats.deletedUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card class="table-card">
+      <mat-card-header><mat-card-title>Recent Registrations</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="stats.recentUsers" class="recent-table">
+          <ng-container matColumnDef="id"><th mat-header-cell *matHeaderCellDef>ID</th><td mat-cell *matCellDef="let u">{{ u.id }}</td></ng-container>
+          <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Name</th><td mat-cell *matCellDef="let u">{{ u.name }}</td></ng-container>
+          <ng-container matColumnDef="username"><th mat-header-cell *matHeaderCellDef>Username</th><td mat-cell *matCellDef="let u">{{ u.username }}</td></ng-container>
+          <ng-container matColumnDef="role"><th mat-header-cell *matHeaderCellDef>Role</th><td mat-cell *matCellDef="let u">{{ u.role }}</td></ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let u"><span [class]="'badge badge-' + u.status">{{ u.status }}</span></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

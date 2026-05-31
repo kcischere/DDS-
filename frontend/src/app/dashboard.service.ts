@@ -8,11 +8,30 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getStats(): Observable<any> {
-    const headers = new HttpHeaders({
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    });
-    return this.http.get(`${this.apiUrl}/dashboard/stats`, { headers });
+  private noCache(): { headers: HttpHeaders } {
+    return {
+      headers: new HttpHeaders({ 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' })
+    };
   }
+
+  getStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/dashboard/stats`, this.noCache());
+  }
+
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dashboard/users`, this.noCache());
+  }
+
+  updateUserStatus(id: number, status: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/dashboard/users/${id}/status`, { status });
+  }
+
+  getLogs(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/logs`, this.noCache());
+}
+
+getLogsByAction(action: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/logs/filter?action=${action}`, this.noCache());
+}
+
 }
