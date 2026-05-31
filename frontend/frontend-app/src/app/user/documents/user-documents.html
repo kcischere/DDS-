@@ -1,0 +1,85 @@
+<mat-toolbar color="primary">
+  <span>ERDMS</span>
+  <span style="flex:1"></span>
+  <a mat-button routerLink="/user/myinfo" style="color:white">👤 My Info</a>
+  <a mat-button routerLink="/user/documents" style="color:white">📁 Documents</a>
+  <button mat-button style="color:white" (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="fm-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <button mat-button (click)="goHome()">🏠 Root</button>
+    <ng-container *ngFor="let crumb of breadcrumb; let i = index">
+      <span class="sep">›</span>
+      <button mat-button (click)="breadcrumb = breadcrumb.slice(0,i+1); currentFolder = crumb; load()">
+        {{ crumb?.name || 'Root' }}
+      </button>
+    </ng-container>
+    <ng-container *ngIf="currentFolder">
+      <span class="sep">›</span>
+      <span class="current">{{ currentFolder.name }}</span>
+    </ng-container>
+  </div>
+
+  <!-- Sort, Filter & Search -->
+  <div class="sort-bar">
+    <span class="sort-label">Sort by:</span>
+    <button mat-stroked-button [class.active-sort]="sortBy==='label'" (click)="setSort('label')">
+      🏷️ Label {{ sortBy==='label' ? (sortDir==='asc' ? '↑' : '↓') : '' }}
+    </button>
+    <button mat-stroked-button [class.active-sort]="sortBy==='date'" (click)="setSort('date')">
+      📅 Date {{ sortBy==='date' ? (sortDir==='asc' ? '↑' : '↓') : '' }}
+    </button>
+    <span style="margin-left:12px;font-size:13px;">Filter:</span>
+    <mat-form-field appearance="outline" style="width:150px;margin-left:6px;">
+      <mat-label>By Label</mat-label>
+      <select matNativeControl [(ngModel)]="filterLabel" (change)="applySort()">
+        <option value="">All</option>
+        <option *ngFor="let l of labels" [value]="l.name">{{ l.name }}</option>
+      </select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" style="width:200px;margin-left:12px;">
+      <mat-label>🔍 Search by name</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applySort()" placeholder="Search files..." />
+    </mat-form-field>
+  </div>
+
+  <!-- File Grid -->
+  <div class="fm-grid">
+    <!-- Folders -->
+    <div class="fm-item folder-item" *ngFor="let folder of folders">
+      <div class="item-icon" (dblclick)="openFolder(folder)">📁</div>
+      <div class="item-name" (dblclick)="openFolder(folder)">{{ folder.name }}</div>
+      <div class="item-actions">
+        <button mat-icon-button matTooltip="Open" (click)="openFolder(folder)">▶</button>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="fm-item doc-item" *ngFor="let doc of filteredDocuments">
+      <div class="item-icon" (click)="viewDocument(doc)">📄</div>
+      <div class="item-name" (click)="viewDocument(doc)" [matTooltip]="doc.original_name">{{ doc.original_name }}</div>
+      <div class="doc-label" *ngIf="doc.label">🏷️ {{ doc.label }}</div>
+      <div class="item-actions">
+        <button mat-icon-button matTooltip="View" (click)="viewDocument(doc)">👁️</button>
+        <button mat-icon-button matTooltip="Download" (click)="downloadDocument(doc)">⬇️</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="folders.length === 0 && filteredDocuments.length === 0">
+      <p>No files found in this location.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Viewer -->
+<div class="viewer-overlay" *ngIf="viewerOpen">
+  <div class="viewer-modal">
+    <div class="viewer-header">
+      <span>{{ viewerDoc?.original_name }}</span>
+      <button mat-button style="color:white" (click)="closeViewer()">✕ Close</button>
+    </div>
+    <iframe class="viewer-frame" [src]="viewerUrl" frameborder="0"></iframe>
+  </div>
+</div>

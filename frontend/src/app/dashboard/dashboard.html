@@ -1,0 +1,206 @@
+<div class="dashboard-container">
+  <h1 class="dashboard-title">Dashboard</h1>
+  
+  <div class="dashboard-header">
+  <h1 class="dashboard-title">Dashboard</h1>
+  <button mat-raised-button color="primary" routerLink="/logs">View Audit Logs</button>
+</div>
+
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <ng-container *ngIf="stats && !loading">
+
+    <!-- User Stats -->
+    <h2 class="section-title">User Overview</h2>
+    <div class="stats-grid">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value">{{ stats.totalUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card active">
+        <mat-card-content>
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <span class="stat-label">Active Users</span>
+            <span class="stat-value">{{ stats.activeUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inactive">
+        <mat-card-content>
+          <div class="stat-icon">⏸️</div>
+          <div class="stat-info">
+            <span class="stat-label">Inactive Users</span>
+            <span class="stat-value">{{ stats.inactiveUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card deleted">
+        <mat-card-content>
+          <div class="stat-icon">🗑️</div>
+          <div class="stat-info">
+            <span class="stat-label">Deleted Users</span>
+            <span class="stat-value">{{ stats.deletedUsers }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Document Stats -->
+    <h2 class="section-title">Document Overview</h2>
+    <div class="stats-grid">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <div class="stat-icon">📄</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Documents</span>
+            <span class="stat-value">{{ stats.totalDocuments }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card active">
+        <mat-card-content>
+          <div class="stat-icon">💾</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Storage Used</span>
+            <span class="stat-value storage">{{ formatBytes(stats.totalStorageBytes) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <h2 class="section-title">Recent Activity</h2>
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Recent Document Uploads</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="stats.recentDocuments" class="recent-table">
+          <ng-container matColumnDef="original_name">
+            <th mat-header-cell *matHeaderCellDef>Document</th>
+            <td mat-cell *matCellDef="let doc">{{ doc.original_name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="uploaded_by">
+            <th mat-header-cell *matHeaderCellDef>Uploaded By</th>
+            <td mat-cell *matCellDef="let doc">{{ doc.uploaded_by }}</td>
+          </ng-container>
+          <ng-container matColumnDef="label">
+            <th mat-header-cell *matHeaderCellDef>Label</th>
+            <td mat-cell *matCellDef="let doc">{{ doc.label || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef>Size</th>
+            <td mat-cell *matCellDef="let doc">{{ formatBytes(doc.size) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="uploaded_at">
+            <th mat-header-cell *matHeaderCellDef>Uploaded At</th>
+            <td mat-cell *matCellDef="let doc">{{ doc.uploaded_at | date:'medium' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['original_name','uploaded_by','label','size','uploaded_at']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['original_name','uploaded_by','label','size','uploaded_at'];"></tr>
+        </table>
+        <p *ngIf="stats.recentDocuments.length === 0" class="empty-msg">No documents uploaded yet.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- System Usage Stats -->
+    <h2 class="section-title">System Usage</h2>
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Top Uploaders</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="stats.topUploaders" class="recent-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>User</th>
+            <td mat-cell *matCellDef="let u">{{ u.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="total_uploads">
+            <th mat-header-cell *matHeaderCellDef>Documents Uploaded</th>
+            <td mat-cell *matCellDef="let u">{{ u.total_uploads }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name','total_uploads']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name','total_uploads'];"></tr>
+        </table>
+        <p *ngIf="stats.topUploaders.length === 0" class="empty-msg">No upload activity yet.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Recent Registrations -->
+    <h2 class="section-title">Recent Registrations</h2>
+    <mat-card class="table-card">
+      <mat-card-content>
+        <table mat-table [dataSource]="stats.recentUsers" class="recent-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="username">
+            <th mat-header-cell *matHeaderCellDef>Username</th>
+            <td mat-cell *matCellDef="let user">{{ user.username }}</td>
+          </ng-container>
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Role</th>
+            <td mat-cell *matCellDef="let user">{{ user.role }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let user">
+              <span [class]="'badge badge-' + user.status">{{ user.status }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef>Registered</th>
+            <td mat-cell *matCellDef="let user">{{ user.created_at | date:'medium' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- All Users Collapsible -->
+    <h2 class="section-title">User Management</h2>
+    <mat-card class="table-card">
+      <mat-card-header class="collapsible-header" (click)="toggleUsers()">
+        <mat-card-title>
+          All Users
+          <span class="toggle-icon">{{ usersExpanded ? '▲' : '▼' }}</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content *ngIf="usersExpanded">
+        <table mat-table [dataSource]="allUsers" class="recent-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="username">
+            <th mat-header-cell *matHeaderCellDef>Username</th>
+            <td mat-cell *matCellDef="let user">{{ user.username }}</td>
+          </ng-container>
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Role</th>
+            <td mat-cell *matCellDef="let user">{{ user.role }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let user">
+              <mat-select [(ngModel)]="user.status" (ngModelChange)="updateStatus(user, $event)">
+                <mat-option *ngFor="let s of statusOptions" [value]="s">{{ s }}</mat-option>
+              </mat-select>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name','username','role','status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name','username','role','status'];"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+</div>

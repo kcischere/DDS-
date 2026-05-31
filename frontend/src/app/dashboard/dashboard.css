@@ -1,0 +1,134 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #e0f2f1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00695c;
+  margin-bottom: 24px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 16px;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px !important;
+}
+
+.stat-icon {
+  font-size: 32px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-card.total .stat-value { color: #00695c; }
+.stat-card.active .stat-value { color: #2e7d32; }
+.stat-card.inactive .stat-value { color: #f57c00; }
+.stat-card.deleted .stat-value { color: #c62828; }
+
+/* Table Card */
+.table-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.recent-table {
+  width: 100%;
+}
+
+/* Status Badge */
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.badge-active { background-color: #c8e6c9; color: #2e7d32; }
+.badge-inactive { background-color: #ffe0b2; color: #e65100; }
+.badge-deleted { background-color: #ffcdd2; color: #c62828; }
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible-header:hover mat-card-title {
+  color: #00695c;
+}
+
+.toggle-icon {
+  font-size: 14px;
+  margin-left: 8px;
+  color: #888;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00695c;
+  margin: 24px 0 12px 0;
+}
+
+.table-card {
+  margin-bottom: 16px;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #888;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.storage {
+  font-size: 24px !important;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  margin-bottom: 0;
+}
